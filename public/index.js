@@ -1299,7 +1299,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (responseText.startsWith('[voice_start]')) {
                     const textToSpeak = responseText.substring('[voice_start]'.length).trim();
                     try {
-                        const responseV2 = await fetch(secondApiUrl + `/tts/openai/advanced?input=${encodeURIComponent(textToSpeak)}&voice=echo&prompt=santa`);
+                        const responseV2 = await fetch(config.secondApiUrl + `/tts/openai/advanced?input=${encodeURIComponent(textToSpeak)}&voice=echo&prompt=santa`);
                         if (!responseV2.ok) throw new Error(`TTS API failed with status ${responseV2.status}`);
                         const audioBlob = await responseV2.blob();
                         const audioBase64 = await blobToBase64(audioBlob);

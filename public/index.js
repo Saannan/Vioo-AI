@@ -1298,7 +1298,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     const textToSpeak = responseText.substring('[voice_start]'.length).trim();
                     updateStatusText('Generating voice...');
                     try {
-                        const responseV2 = await fetch(`https://api.siputzx.my.id/api/tools/tts?text=${encodeURIComponent(textToSpeak)}&voice=id-ID-ArdiNeural&rate=0%25&pitch=-10Hz&volume=0%25`);
+                        const responseV2 = await fetch(`https://api.fasturl.cloud/tts/openai/advanced?input=${encodeURIComponent(textToSpeak)}&voice=echo&prompt=santa`);
                         if (!responseV2.ok) throw new Error(`TTS API failed with status ${responseV2.status}`);
                         const audioBlob = await responseV2.blob();
                         const audioBase64 = await blobToBase64(audioBlob);

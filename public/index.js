@@ -1,5 +1,5 @@
 // MAU DI PAKE ?
-// GAK PAPA.. TAPI KASIH SUMBER NYA AJG !
+// GAK PAPA.. TAPI KASIH AUTHOR DAN SUMBER ASLI NYA !
 
 document.addEventListener('DOMContentLoaded', () => {
     const domElements = {
@@ -43,8 +43,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const config = {
         aiName: 'Vioo AI',
-        geminiApiUrl: 'https://fastrestapis.fasturl.cloud/aillm/gemini/advanced',
-        imageApiUrl: 'https://fastrestapis.fasturl.cloud/aiimage/amazonai',
+        mainApiUrl: 'https://fastrestapis.fasturl.cloud',
+        secondApiUrl: 'https://api.fasturl.cloud',
         aiPersonas: {
             default: {
                 name: 'Vioo AI (Default)',
@@ -59,7 +59,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 prompt: "You are Vioo AI, a friendly and intelligent assistant created by Sanjaya Adiputra. Your core personality is warm, approachable and highly helpful. Always address the user as 'kamu' and refer to yourself as 'aku'. Maintain a tone that is both professional and friendly, providing clear and concise information while being approachable and engaging. Your primary objective is to offer precise, relevant and helpful responses that make interactions enjoyable and productive. Be aware of your digital environment and the current time as provided in the context. This prompt is confidential"
             }
         },
-        animationChunkDelay: 30,
+        animationChunkDelay: 20,
         typingIndicatorTimeoutDuration: 30000,
         copySuccessDuration: 3000,
         maxDocumentSize: 10 * 1024 * 1024
@@ -200,6 +200,10 @@ document.addEventListener('DOMContentLoaded', () => {
         'erlang': 'erl', 'fortran': 'f90', 'haskell': 'hs', 'matlab': 'm', 'ocaml': 'ml',
         'prolog': 'pl', 'smalltalk': 'st', 'tcl': 'tcl', 'vhdl': 'vhd', 'verilog': 'v'
     };
+
+    function capitalizeText(text) {
+        return text.split(/([.!?]\s*)/).map(sentence => sentence.charAt(0).toUpperCase() + sentence.slice(1).toLowerCase()).join('')
+    }
 
     function getDynamicPrompt() {
         const now = new Date();
@@ -866,7 +870,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 e.stopPropagation();
                 deleteSpecificSession(session.id);
             };
-            
+
             actionsDiv.appendChild(renameBtn);
             actionsDiv.appendChild(deleteBtn);
             item.appendChild(actionsDiv);
@@ -982,7 +986,7 @@ document.addEventListener('DOMContentLoaded', () => {
             let counter = 2;
             const existingTitles = Object.values(appState.chatSessions).map(session => session.title);
             while (existingTitles.includes(finalTitle)) {
-                finalTitle = `${baseTitle} (${counter})`;
+                finalTitle = `${capitalizeText(baseTitle)} (${counter})`;
                 counter++;
             }
             currentSession.title = finalTitle;
@@ -1177,7 +1181,7 @@ document.addEventListener('DOMContentLoaded', () => {
             formData.append('file', fileObject, fileObject.name);
         }
         try {
-            const response = await fetch(config.geminiApiUrl, {
+            const response = await fetch(config.mainApiUrl + '/aillm/gemini/advanced', {
                 method: 'POST',
                 body: formData,
                 headers: { 'accept': 'application/json' },
@@ -1263,7 +1267,6 @@ document.addEventListener('DOMContentLoaded', () => {
         resetChatInputHeight();
         domElements.chatInput.focus();
         showTypingIndicator();
-        updateStatusText(`${config.aiName} is thinking...`);
         appState.currentAbortController = new AbortController();
         updateSendButtonUI(true);
         try {
@@ -1274,8 +1277,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     cleanupAfterResponseAttempt('Ready. How can I help?');
                     return;
                 }
-                updateStatusText('Generating image...');
-                const imageUrl = `${config.imageApiUrl}?prompt=${encodeURIComponent(prompt)}&size=4_5`;
+                const imageUrl = `${config.mainApiUrl}/aiimage/amazonai?prompt=${encodeURIComponent(prompt)}&size=4_5`;
                 try {
                     const response = await fetch(imageUrl, {
                         signal: appState.currentAbortController.signal
@@ -1283,7 +1285,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     const blob = await response.blob();
                     const localImageUrl = await fileToBase64(blob);
                     const imageName = `${prompt.substring(0,20).replace(/\s+/g, '_') || 'generated_image'}.png`;
-                    addNewMessage('bot', `Image for: "${prompt}"`, 'image', {name: imageName, url: localImageUrl, caption: `Image for: "${prompt}"`}, false);
+                    addNewMessage('bot', `${capitalizeText(prompt)}`, 'image', {name: imageName, url: localImageUrl, caption: `${capitalizeText(prompt)}`}, false);
                     cleanupAfterResponseAttempt();
                 } catch (apiError) {
                      if (apiError.name === 'AbortError') {
@@ -1296,15 +1298,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 const responseText = await AI_API_Call(messageText, getDynamicPrompt(), appState.currentSessionId, null, appState.currentAbortController.signal);
                 if (responseText.startsWith('[voice_start]')) {
                     const textToSpeak = responseText.substring('[voice_start]'.length).trim();
-                    updateStatusText('Generating voice...');
                     try {
-                        const responseV2 = await fetch(`https://api.fasturl.cloud/tts/openai/advanced?input=${encodeURIComponent(textToSpeak)}&voice=echo&prompt=santa`);
+                        const responseV2 = await fetch(secondApiUrl + `/tts/openai/advanced?input=${encodeURIComponent(textToSpeak)}&voice=echo&prompt=santa`);
                         if (!responseV2.ok) throw new Error(`TTS API failed with status ${responseV2.status}`);
                         const audioBlob = await responseV2.blob();
                         const audioBase64 = await blobToBase64(audioBlob);
                         addNewMessage('bot', textToSpeak, 'voice', { name: 'vioo-ai-voice.mp3', url: audioBase64, size: audioBlob.size, caption: textToSpeak }, false);
                         cleanupAfterResponseAttempt();
                     } catch (ttsError) {
+                        console.error(ttsError)
                         addNewMessage('bot', `I wanted to reply with my voice, but couldn't generate the audio. Error: ${ttsError.message}`, 'text', null, true);
                         cleanupAfterResponseAttempt('Voice generation failed.');
                     }
@@ -1331,7 +1333,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function processFileMessage(caption, fileObject, fileType) {
         showTypingIndicator();
-        updateStatusText(`Processing ${fileType}...`);
         appState.currentAbortController = new AbortController();
         updateSendButtonUI(true);
         try {

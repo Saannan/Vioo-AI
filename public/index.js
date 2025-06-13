@@ -667,7 +667,10 @@ document.addEventListener('DOMContentLoaded', () => {
             messageContentDiv.appendChild(audioPlayer);
             
         } else if (isNewMessageAnimation && messageData.sender === 'bot' && messageData.type === 'text') {
-            animateBotMessage(messageContentDiv, messageData.content);
+            animateBotMessage(messageContentDiv, messageData.content, () => {
+
+                void domElements.chatContainer.offsetHeight;
+            });
         } else {
             messageContentDiv.innerHTML = formatMessageContent(messageData.content);
             Prism.highlightAllUnder(messageContentDiv);
@@ -1018,7 +1021,7 @@ document.addEventListener('DOMContentLoaded', () => {
         renderCurrentSession();
     }
 
-    function animateBotMessage(element, text) {
+    function animateBotMessage(element, text, onComplete) {
         const segments = [];
         const parts = text.split(/(```[\s\S]*?```)/g);
         for (const part of parts) {
@@ -1037,9 +1040,11 @@ document.addEventListener('DOMContentLoaded', () => {
             if (appState.currentAbortController && appState.currentAbortController.signal.aborted) {
                 element.innerHTML = formatMessageContent(text);
                 Prism.highlightAllUnder(element);
+                if (onComplete) onComplete();
                 return;
             }
             if (segmentIndex >= segments.length) {
+                if (onComplete) onComplete();
                 return;
             }
             const segment = segments[segmentIndex];

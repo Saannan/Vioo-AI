@@ -668,7 +668,9 @@ document.addEventListener('DOMContentLoaded', () => {
             
         } else if (isNewMessageAnimation && messageData.sender === 'bot' && messageData.type === 'text') {
             animateBotMessage(messageContentDiv, messageData.content, () => {
-                scrollToBottom();
+                requestAnimationFrame(() => {
+                    scrollToBottom();
+                });
             });
         } else {
             messageContentDiv.innerHTML = formatMessageContent(messageData.content);

@@ -667,11 +667,7 @@ document.addEventListener('DOMContentLoaded', () => {
             messageContentDiv.appendChild(audioPlayer);
             
         } else if (isNewMessageAnimation && messageData.sender === 'bot' && messageData.type === 'text') {
-            animateBotMessage(messageContentDiv, messageData.content, () => {
-                requestAnimationFrame(() => {
-                    scrollToBottom();
-                });
-            });
+            animateBotMessage(messageContentDiv, messageData.content);
         } else {
             messageContentDiv.innerHTML = formatMessageContent(messageData.content);
             Prism.highlightAllUnder(messageContentDiv);
@@ -1022,7 +1018,7 @@ document.addEventListener('DOMContentLoaded', () => {
         renderCurrentSession();
     }
 
-    function animateBotMessage(element, text, onComplete) {
+    function animateBotMessage(element, text) {
         const segments = [];
         const parts = text.split(/(```[\s\S]*?```)/g);
         for (const part of parts) {
@@ -1041,11 +1037,9 @@ document.addEventListener('DOMContentLoaded', () => {
             if (appState.currentAbortController && appState.currentAbortController.signal.aborted) {
                 element.innerHTML = formatMessageContent(text);
                 Prism.highlightAllUnder(element);
-                if (onComplete) onComplete();
                 return;
             }
             if (segmentIndex >= segments.length) {
-                if (onComplete) onComplete();
                 return;
             }
             const segment = segments[segmentIndex];
@@ -1065,7 +1059,6 @@ document.addEventListener('DOMContentLoaded', () => {
             function revealNextChunk() {
                 if (appState.currentAbortController && appState.currentAbortController.signal.aborted) {
                     tempSpan.innerHTML = processRegularTextSegment(textContent);
-                    callback();
                     return;
                 }
                 if (currentWordIndex >= wordsAndSpaces.length) {
@@ -1103,7 +1096,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (appState.currentAbortController && appState.currentAbortController.signal.aborted) {
                     placeholder.innerHTML = formatMessageContent(codeContent);
                     Prism.highlightAllUnder(placeholder);
-                    callback();
                     return;
                 }
                 const codeHtml = formatMessageContent(codeContent);

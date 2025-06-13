@@ -668,8 +668,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
         } else if (isNewMessageAnimation && messageData.sender === 'bot' && messageData.type === 'text') {
             animateBotMessage(messageContentDiv, messageData.content, () => {
-
-                void domElements.chatContainer.offsetHeight;
+                scrollToBottom();
             });
         } else {
             messageContentDiv.innerHTML = formatMessageContent(messageData.content);
@@ -1064,6 +1063,7 @@ document.addEventListener('DOMContentLoaded', () => {
             function revealNextChunk() {
                 if (appState.currentAbortController && appState.currentAbortController.signal.aborted) {
                     tempSpan.innerHTML = processRegularTextSegment(textContent);
+                    callback();
                     return;
                 }
                 if (currentWordIndex >= wordsAndSpaces.length) {
@@ -1101,6 +1101,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (appState.currentAbortController && appState.currentAbortController.signal.aborted) {
                     placeholder.innerHTML = formatMessageContent(codeContent);
                     Prism.highlightAllUnder(placeholder);
+                    callback();
                     return;
                 }
                 const codeHtml = formatMessageContent(codeContent);

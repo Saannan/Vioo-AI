@@ -44,7 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const config = {
         aiName: 'Vioo AI',
         mainApiUrl: 'https://fastrestapis.fasturl.cloud',
-        secondApiUrl: 'https://api.fasturl.cloud',
+        secondApiUrl: 'https://api.fasturl.link',
         aiPersonas: {
             default: {
                 name: 'Vioo AI (Default)',
@@ -1177,11 +1177,12 @@ document.addEventListener('DOMContentLoaded', () => {
         formData.append('ask', query);
         formData.append('style', prompt);
         formData.append('sessionId', sessionId);
+        formData.append('model', 'gemini-2.0-flash');
         if (fileObject) {
             formData.append('file', fileObject, fileObject.name);
         }
         try {
-            const response = await fetch(config.mainApiUrl + '/aillm/gemini/advanced', {
+            const response = await fetch(config.secondApiUrl + '/aillm/gemini/advanced', {
                 method: 'POST',
                 body: formData,
                 headers: { 'accept': 'application/json' },
